@@ -12,7 +12,7 @@ export let INR_BALANCES: inr = {
         locked: 0
     },
     "user4": {
-        balance: 50,
+        balance: 500,
         locked: 0
     }
 }

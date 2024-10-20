@@ -5,19 +5,17 @@ export const sellRoute:any = async(req: Request, res: Response, next: NextFuncti
     try {
         let {userId, stockSymbol, quantity, price, stockType} = req.body;
         if(!userId || !stockSymbol || !quantity || !price || !stockType) {
-            return res.status(401).json("Something is missing in the body");
+            return res.status(401).json("Daya body me kuch to gadbad hai");
         }
         const presentStock = STOCK_BALANCES?.[userId]?.[stockSymbol]?.[stockType]?.quantity ?? 0;
 
         if(presentStock < quantity) {
-            return res.status(401).json("Stock Balance is not sufficient");
+            return res.status(401).json("Stock Balance me kami, chinta na kre aapke level bi niklenge");
         }
         const oppositeStockType: string = stockType === "yes" ? "no" : "yes";
         const oppositePrice: number = 10-price; 
         
         const oppositeQuantityInOrderBook = ORDERBOOK?.[stockSymbol]?.[oppositeStockType]?.[oppositePrice]?.total ?? 0;
-                // ORDERBOOK?.[stockSymbol]?.[stockType]?.[price]?.total ?? quantity;
-
          
         if (!ORDERBOOK[stockSymbol]) {
             ORDERBOOK[stockSymbol] = {}
@@ -25,8 +23,14 @@ export const sellRoute:any = async(req: Request, res: Response, next: NextFuncti
         if (!ORDERBOOK[stockSymbol][stockType]) {
             ORDERBOOK[stockSymbol][stockType] = {}
         }                        
+        if (!ORDERBOOK[stockSymbol][oppositeStockType]) {
+            ORDERBOOK[stockSymbol][oppositeStockType] = {}
+        }                  
         if (!ORDERBOOK[stockSymbol][stockType][price]) {
             ORDERBOOK[stockSymbol][stockType][price] = {"total": 0, "orders": []}
+        }
+        if (!ORDERBOOK[stockSymbol][oppositeStockType][oppositePrice]) {
+            ORDERBOOK[stockSymbol][oppositeStockType][oppositePrice] = {"total": 0, "orders": []}
         }
         
         if (oppositeQuantityInOrderBook === quantity) {
@@ -117,7 +121,7 @@ export const sellRoute:any = async(req: Request, res: Response, next: NextFuncti
             return res.status(200).json({ORDERBOOK, STOCK_BALANCES, INR_BALANCES});
         }
 
-        // return res.status(200).json({ORDERBOOK, STOCK_BALANCES, INR_BALANCES});
+
     } 
     catch (error: any) {
         console.log(error.message);
@@ -131,7 +135,7 @@ export const buyRoute:any = async(req: Request, res: Response, next: NextFunctio
     try {
         let {userId, stockSymbol, quantity, price, stockType} = req.body;
         if(!userId || !stockSymbol || !quantity || !price || !stockType) {
-            return res.status(401).json("Something is missing in the body");
+            return res.status(401).json("Body me kuch to gadbad hai daya");
         }
         const inrBalance = INR_BALANCES[userId].balance;
         if(inrBalance < (price*quantity)) {
@@ -147,9 +151,15 @@ export const buyRoute:any = async(req: Request, res: Response, next: NextFunctio
         }                     
         if (!ORDERBOOK[stockSymbol][stockType]) {
             ORDERBOOK[stockSymbol][stockType] = {}
-        }                        
+        }                   
+        if (!ORDERBOOK[stockSymbol][oppositeStockType]) {
+            ORDERBOOK[stockSymbol][oppositeStockType] = {}
+        }                  
         if (!ORDERBOOK[stockSymbol][stockType][price]) {
             ORDERBOOK[stockSymbol][stockType][price] = {"total": 0, "orders": []}
+        }
+        if (!ORDERBOOK[stockSymbol][oppositeStockType][oppositePrice]) {
+            ORDERBOOK[stockSymbol][oppositeStockType][oppositePrice] = {"total": 0, "orders": []}
         }
 
         if (sameQuantityInOrderBook === quantity) {
@@ -205,42 +215,44 @@ export const buyRoute:any = async(req: Request, res: Response, next: NextFunctio
             return res.status(200).json({ORDERBOOK, INR_BALANCES, STOCK_BALANCES});
         } 
 
-        // else if (sameQuantityInOrderBook < quantity) {
-        //     const total = ORDERBOOK[stockSymbol][stockType][price].total
-        //     STOCK_BALANCES[userId][stockSymbol][stockType].quantity += total;
-        //     INR_BALANCES[userId].balance -= (price*total);
-        //     quantity -= total;
-        //     STOCK_BALANCES[userId][stockSymbol][stockType].locked += quantity
-        //     ORDERBOOK[stockSymbol][stockType][price].total += quantity;
-        //     const array = ORDERBOOK[stockSymbol][stockType][price].orders;
-        //     let success = false;
-        //     array.forEach((item) => {
-        //         if(item.userId === userId && item.type === "normal") {
-        //             item.quantity += quantity
-        //             success= true
-        //         }                
-        //     })
-        //     if(!success){
-        //         array.push({userId: userId, type: "normal", quantity: quantity});
-        //     }
+        else if (sameQuantityInOrderBook < quantity) {
+            const total = ORDERBOOK[stockSymbol][stockType][price].total
+            STOCK_BALANCES[userId][stockSymbol][stockType].quantity += total;
+            INR_BALANCES[userId].balance -= (price*total);
 
-        //     ORDERBOOK[stockSymbol][oppositeStockType][oppositePrice].total = 0;
-        //     const array2 = ORDERBOOK[stockSymbol][oppositeStockType][oppositePrice].orders;
-        //     array2.forEach((item) => {
-        //         if (item.type === "normal") {
-        //             INR_BALANCES[item.userId].balance += (item.quantity * oppositePrice)
-        //             STOCK_BALANCES[item.userId][stockSymbol][oppositeStockType].quantity -= item.quantity
-        //         } else if(item.type === "reverse") {
-        //             INR_BALANCES[item.userId].locked -= (item.quantity * price)
-        //             STOCK_BALANCES[item.userId][stockSymbol][stockType].quantity += item.quantity
-        //         }
-        //     })
-        //     ORDERBOOK[stockSymbol][oppositeStockType][oppositePrice].orders = []
-        //     return res.status(200).json({ORDERBOOK, STOCK_BALANCES, INR_BALANCES});
-        // }
+            quantity -= total;
 
-        
-  
+            INR_BALANCES[userId].locked += (price*quantity);
+            ORDERBOOK[stockSymbol][oppositeStockType][oppositePrice].total += quantity;
+            console.log(ORDERBOOK[stockSymbol][oppositeStockType][oppositePrice].total);
+
+            
+            const array = ORDERBOOK[stockSymbol][oppositeStockType][oppositePrice].orders;
+            let success = false;
+            array.forEach((item) => {
+                if(item.userId === userId && item.type === "reverse") {
+                    item.quantity += quantity
+                    success= true
+                }                
+            })
+            if(!success){
+                array.push({userId: userId, type: "reverse", quantity: quantity});
+            }
+            console.log(ORDERBOOK[stockSymbol][stockType][price].total);
+            ORDERBOOK[stockSymbol][stockType][price].total = 0;
+            const array2 = ORDERBOOK[stockSymbol][stockType][price].orders;
+            array2.forEach((item) => {
+                if (item.type === "normal") {
+                    INR_BALANCES[item.userId].balance += (item.quantity * price)
+                    STOCK_BALANCES[item.userId][stockSymbol][stockType].quantity -= item.quantity
+                } else if(item.type === "reverse") {
+                    INR_BALANCES[item.userId].locked -= (item.quantity * oppositePrice)
+                    STOCK_BALANCES[item.userId][stockSymbol][oppositeStockType].quantity += item.quantity
+                }
+            })
+            ORDERBOOK[stockSymbol][stockType][price].orders = []
+            return res.status(200).json({ORDERBOOK, STOCK_BALANCES, INR_BALANCES});
+        } 
     } 
     catch (error: any) {
         console.log(error.message);
