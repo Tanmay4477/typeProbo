@@ -171,46 +171,44 @@ export const buyRoute:any = async(req: Request, res: Response, next: NextFunctio
         }
 
 
-        // else if (sameQuantityInOrderBook > quantity) {
-        //     ORDERBOOK[stockSymbol][stockType][price].total -= quantity;
-        //     STOCK_BALANCES[userId][stockSymbol][stockType].quantity += quantity;
-        //     INR_BALANCES[userId].balance -= (price*quantity);
-        //     const array = ORDERBOOK[stockSymbol][stockType][price].orders;
+        else if (sameQuantityInOrderBook > quantity) {
+            ORDERBOOK[stockSymbol][stockType][price].total -= quantity;
+            STOCK_BALANCES[userId][stockSymbol][stockType].quantity += quantity;
+            INR_BALANCES[userId].balance -= (price*quantity);
+            const array = ORDERBOOK[stockSymbol][stockType][price].orders;
 
-        //     array.forEach((item) => {
-        //         if(quantity >= item.quantity) {
-        //             quantity -= item.quantity;
-        //             if(item.type === "normal") {
-        //                 INR_BALANCES[item.userId].balance += (item.quantity * oppositePrice);
-        //                 STOCK_BALANCES[item.userId][stockSymbol][oppositeStockType].quantity -= item.quantity
-        //             }
-        //             else {
-        //                 INR_BALANCES[item.userId].locked -= (item.quantity * price)
-        //                 STOCK_BALANCES[item.userId][stockSymbol][stockType].quantity += item.quantity
-        //             }
-        //             array.shift();
-        //         }
-        //         else {
-        //             item.quantity -= quantity;
-        //             if(item.type === "normal") {
-        //                 INR_BALANCES[item.userId].balance += (quantity * oppositePrice);
-        //                 STOCK_BALANCES[item.userId][stockSymbol][oppositeStockType].quantity -= item.quantity
-        //             }
-        //             else {
-        //                 INR_BALANCES[item.userId].locked -= (quantity * price)
-        //                 STOCK_BALANCES[item.userId][stockSymbol][stockType].quantity += quantity
-        //             }
-        //         }
-        //     }) 
-
-
-        //     return res.status(200).json({ORDERBOOK, INR_BALANCES, STOCK_BALANCES});
-        // } 
+            array.forEach((item) => {
+                if(quantity >= item.quantity) {
+                    quantity -= item.quantity;
+                    if(item.type === "normal") {
+                        INR_BALANCES[item.userId].balance += (item.quantity * price);
+                        STOCK_BALANCES[item.userId][stockSymbol][stockType].quantity -= item.quantity
+                    }
+                    else {
+                        INR_BALANCES[item.userId].locked -= (item.quantity * oppositePrice)
+                        STOCK_BALANCES[item.userId][stockSymbol][oppositeStockType].quantity += item.quantity
+                    }
+                    array.shift();
+                }
+                else {
+                    item.quantity -= quantity;
+                    if(item.type === "normal") {
+                        INR_BALANCES[item.userId].balance += (quantity * price);
+                        STOCK_BALANCES[item.userId][stockSymbol][stockType].quantity -= item.quantity
+                    }
+                    else {
+                        INR_BALANCES[item.userId].locked -= (quantity * oppositePrice)
+                        STOCK_BALANCES[item.userId][stockSymbol][oppositeStockType].quantity += quantity
+                    }
+                }
+            }) 
+            return res.status(200).json({ORDERBOOK, INR_BALANCES, STOCK_BALANCES});
+        } 
 
         // else if (sameQuantityInOrderBook < quantity) {
-        //     const total = ORDERBOOK[stockSymbol][oppositeStockType][oppositePrice].total
-        //     STOCK_BALANCES[userId][stockSymbol][stockType].quantity -= total;
-        //     INR_BALANCES[userId].balance += (price*total);
+        //     const total = ORDERBOOK[stockSymbol][stockType][price].total
+        //     STOCK_BALANCES[userId][stockSymbol][stockType].quantity += total;
+        //     INR_BALANCES[userId].balance -= (price*total);
         //     quantity -= total;
         //     STOCK_BALANCES[userId][stockSymbol][stockType].locked += quantity
         //     ORDERBOOK[stockSymbol][stockType][price].total += quantity;
