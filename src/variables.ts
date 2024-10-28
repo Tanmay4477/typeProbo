@@ -17,12 +17,12 @@ export let INR_BALANCES: inr = {
     }
 }
 
-interface user {
+export interface user {
     balance: number,
     locked: number
 }
 
-interface inr {
+export interface inr {
     [userId: string]: user
 }
 
@@ -31,57 +31,62 @@ interface inr {
 export let ORDERBOOK: book = {
     "BTC_USDT_10_OCT_2024": {
         "yes": {
-            "9.5": {
+            3.5: {
                 "total": 6,
-                "orders": [{userId: "user1", type: "reverse", quantity: 4}, {userId: "user4", type: "normal", quantity: 2}]
+                "orders": [{userId: "user1", type: "reverse", quantity: 4, orderId: 1}, {userId: "user4", type: "normal", quantity: 2, orderId: 2}]
             },
-            "8.5": {
+            4.5: {
                 "total": 4,
-                "orders": [{userId: "user2", type: "normal", quantity: 3}, {userId: "user1", type: "normal", quantity: 5}]
+                "orders": [{userId: "user2", type: "normal", quantity: 3, orderId: 3}, {userId: "user1", type: "normal", quantity: 5, orderId: 4}]
             }
         },
         "no": {
-            "1": {
+            1: {
                 "total": 3,
-                "orders": [{userId: "user3", type: "normal", quantity: 2}, {userId: "user2", type: "normal", quantity: 1}]
+                "orders": [{userId: "user3", type: "normal", quantity: 2, orderId: 5}, {userId: "user2", type: "normal", quantity: 1, orderId: 6}]
+            },
+            2: {
+                "total": 1,
+                "orders": [{userId: "user3", type: "normal", quantity: 2, orderId: 5}, {userId: "user2", type: "normal", quantity: 1, orderId: 6}]
             }
         }
     },
     "BTC_USDT_9_OCT_2024": {
         "yes": {
-            "6": {
+            5: {
                 "total": 9,
-                "orders": [{userId: "user1", type: "reverse", quantity: 4}, {userId: "user4", type: "normal", quantity: 5}]
+                "orders": [{userId: "user1", type: "reverse", quantity: 4, orderId: 7}, {userId: "user4", type: "normal", quantity: 5, orderId: 8}]
             },
-            "5": {
+            6: {
                 "total": 30,
-                "orders": [{userId: "user3", type: "normal", quantity: 10}, {userId: "user2", type: "reverse", quantity: 20}]
+                "orders": [{userId: "user3", type: "normal", quantity: 10, orderId: 9}, {userId: "user2", type: "reverse", quantity: 20, orderId: 10}]
             }
         }
     }
 }
 
-interface orders {
+export interface orders {
     userId: string,
     type: string,
-    quantity: number
+    quantity: number,
+    orderId: number
 }
-interface price {
+export interface price {
     total: number,
     orders: orders[]
 }
-interface stockType {
-    [key: string]: price
+export interface stockType {
+    [key: number]: price
 }
-interface stockSymbol {
+export interface stockSymbol {
     [key: string]: stockType
 }
-interface book {
+export interface book {
     [key: string]: stockSymbol
 }
 
 
-export let STOCK_BALANCES: stockBalance = {
+export let STOCK_BALANCES: stockBalanceInterface = {
 	"user1": {
 	   "BTC_USDT_10_OCT_2024": {
 		   "yes": {
@@ -117,19 +122,19 @@ export let STOCK_BALANCES: stockBalance = {
 }
 
 
-interface yesOrNo {
+export interface yesOrNo {
     quantity: number,
     locked: number
 }
 
-interface stock {
+export interface stock {
     [key: string] : yesOrNo
 }
 
-interface user2 {
+export interface user2 {
     [key: string]: stock
 }
 
-interface stockBalance {
+export interface stockBalanceInterface {
     [key: string]: user2
 }

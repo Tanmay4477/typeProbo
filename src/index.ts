@@ -1,8 +1,8 @@
 import express, {Request, Response} from "express";
-const app = express();
+export const app = express();
 import apiRoutes from "./apiRoutes";
 
-const port = 3000;
+const port = 3001;
 
 app.use(express.json());
 app.use("/", apiRoutes);

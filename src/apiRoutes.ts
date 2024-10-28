@@ -1,26 +1,25 @@
 import express from "express";
 const router = express.Router();
-import {buyRoute, sellRoute} from "./engine";
+import * as all from "./engine";
 
-// Endpoints
-// router.route("/user/create/:userId").post();
-// router.route("/symbol/create/:stockSymbol").post();
-// router.route("/orderbook").get();
-// router.route("/balances/inr").get();
-// router.route("/balances/stock").get()
-// router.route("/reset").post();
+router.route("/user/create/:userId").post(all.createUser);
+router.route("/symbol/create/:stockSymbol").post(all.createSymbol);
+router.route("/orderbook").get(all.orderbook);
+router.route("/balances/inr").get(all.inrBalances);
+router.route("/balances/stock").get(all.stockBalance)
+router.route("/reset").post(all.reset);
 
-// // Functionalities
-// router.route("/balance/inr/:userId").get();
-// router.route("/onramp/inr").post()
-// router.route("/balance/stock/:userId").get();
-// router.route("/orderbook/:stockSymbol").get()
+// Functionalities
+router.route("/balance/inr/:userId").get(all.balanceOfUser);
+router.route("/onramp/inr").post(all.onrampInr)
+router.route("/balance/stock/:userId").get(all.balanceOfUserStock);
+router.route("/orderbook/:stockSymbol").get(all.viewBook)
+router.route("/trade/mint").post(all.mintTokens)
+router.route("/order/cancel").post(all.cancel)
 
 
-// 3 main functions
-router.route("/order/buy").post(buyRoute);
-router.route("/order/sell").post(sellRoute);
-// Minting already happening inside buy and sell, here we are minting fresh tokens to the same user and deducting their balance
-// router.route("/trade/mint").post()
+// 2 main functions
+router.route("/order/buy").post(all.buyYesNo);
+router.route("/order/sell").post(all.sellYesNo);
 
 export default router;
