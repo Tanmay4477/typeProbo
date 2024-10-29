@@ -4,6 +4,6 @@ module.exports = {
     transform: {
       "^.+\\.ts?$": "ts-jest", // Transforms TypeScript files using ts-jest
     },
-    moduleFileExtensions: ["ts", "js"], // Supports both TypeScript (.ts) and JavaScript (.js) files
+    moduleFileExtensions: ["js", "ts"], // Supports both TypeScript (.ts) and JavaScript (.js) files
   };
   

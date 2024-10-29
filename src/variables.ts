@@ -46,7 +46,7 @@ export let ORDERBOOK: book = {
                 "orders": [{userId: "user3", type: "normal", quantity: 2, orderId: 5}, {userId: "user2", type: "normal", quantity: 1, orderId: 6}]
             },
             2: {
-                "total": 1,
+                "total": 3,
                 "orders": [{userId: "user3", type: "normal", quantity: 2, orderId: 5}, {userId: "user2", type: "normal", quantity: 1, orderId: 6}]
             }
         }
