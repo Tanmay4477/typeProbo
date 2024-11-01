@@ -46,7 +46,7 @@ export let ORDERBOOK: book = {
                 "orders": [{userId: "user3", type: "normal", quantity: 2, orderId: 5}, {userId: "user2", type: "normal", quantity: 1, orderId: 6}]
             },
             2: {
-                "total": 3,
+                "total": 1,
                 "orders": [{userId: "user3", type: "normal", quantity: 2, orderId: 5}, {userId: "user2", type: "normal", quantity: 1, orderId: 6}]
             }
         }
@@ -137,4 +137,10 @@ export interface user2 {
 
 export interface stockBalanceInterface {
     [key: string]: user2
+}
+
+export function resetVariables() {
+    INR_BALANCES = {};
+    ORDERBOOK = {};
+    STOCK_BALANCES = {};
 }

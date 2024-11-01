@@ -1,4 +1,4 @@
-import { stockSymbol } from './variables';
+import { stockSymbol, stockType } from './variables';
 import {app} from "./index";
 import request from "supertest";
 
@@ -77,7 +77,6 @@ describe("E-to-E-1", () => {
   });
 });
 
-/////// ----------------------------------------------------------------- ///////////////////////////////// 
 
 describe("E-to-E-2", () => {
   beforeAll(async () => {
@@ -255,7 +254,6 @@ describe("E-to-E-3", () => {
     });
     expect(response.status).toBe(200);
 
-    // Insufficient INR Balance for User2 when placing buy order
     response = await request(app).post("/order/buy").send({
       userId: "user2",
       stockSymbol: "ETH_USD_15_Oct_2024_12_00",
@@ -300,9 +298,10 @@ describe("E-to-E-3", () => {
     expect(response.status).toBe(200);
     expect(response.body["user2"]).toStrictEqual({
       balance: 1000,
-      locked: 1700,
+      locked: 1600,
     });
 
+    
     response = await request(app).get("/balance/stock/user2");
     expect(response.status).toBe(200);
     expect(response.body["ETH_USD_15_Oct_2024_12_00"]["yes"]).toStrictEqual({
@@ -350,44 +349,210 @@ describe("E-to-E-3", () => {
     response = await request(app).get("/balances/inr");
     expect(response.status).toBe(200);
     expect(response.body["user1"]).toStrictEqual({
+      balance: 0,
+      locked: 800,
+    });
+
+    response = await request(app).get("/balances/inr");
+    expect(response.status).toBe(200);
+    expect(response.body["user3"]).toStrictEqual({
+      balance: 2850,
+      locked: 0
+    })
+
+    response = await request(app).get("/balances/stock");
+    expect(response.status).toBe(200);
+    expect(response.body["user3"]["ETH_SOL_16_Oct_2024_12_00"]["no"]).toStrictEqual({
+      quantity: 200,
+      locked: 0,
+    });
+    ///////
+
+    response = await request(app).get("/balances/stock");
+    expect(response.status).toBe(200);
+    expect(response.body["user3"]["ETH_SOL_16_Oct_2024_12_00"]["yes"]).toStrictEqual({
+      quantity: 0,
+      locked: 200,
+    });
+});
+});
+
+describe("E-to-E-4", () => {
+  beforeAll(async () => {
+    await request(app).post("/reset");
+  });
+  
+  it("should handle my ultimate gandh", async () => {
+
+    // 4 users banaye h
+    let response = await request(app).post("/user/create/user1");
+    expect(response.status).toBe(200);
+
+    response = await request(app).post("/user/create/user2");
+    expect(response.status).toBe(200);
+
+    response = await request(app).post("/user/create/user3");
+    expect(response.status).toBe(200);
+
+    response = await request(app).post("/user/create/user4");
+    expect(response.status).toBe(200);
+
+    // Symbol 2 hi rkhte h
+
+    response = await request(app).post("/symbol/create/ETH");
+    expect(response.status).toBe(200);
+
+    response = await request(app).post("/symbol/create/SOL");
+    expect(response.status).toBe(200);
+
+    // 2 bhikario ko paise denge aur 2 ko symbol
+
+    response = await request(app).post("/onramp/inr").send({ userId: "user1", amount: 200000});
+    expect(response.status).toBe(200);
+
+    response = await request(app).post("/onramp/inr").send({userId: "user2", amount: 250000});
+    expect(response.status).toBe(200);
+
+    response = await request(app).post("/trade/mint").send({
+      userId: "user3",
+      stockSymbol: "ETH",
+      quantity: 500
+    });
+    expect(response.status).toBe(200);
+
+    response = await request(app).post("/trade/mint").send({
+      userId: "user4",
+      stockSymbol: "SOL",
+      quantity: 500
+    });
+    expect(response.status).toBe(200);
+
+    // Buy Sell shuru kia jaye
+    response = await request(app).post("/order/sell").send({
+      userId: "user3",
+      stockSymbol: "ETH",
+      quantity: 100,
+      price: 4,
+      stockType: "yes"
+    });
+    expect(response.status).toBe(200);
+
+    response = await request(app).post("/order/buy").send({
+      userId: "user1",
+      stockSymbol: "SOL",
+      quantity: 100,
+      price: 7,
+      stockType: "yes"
+    });
+    expect(response.status).toBe(200);
+
+    response = await request(app).post("/order/sell").send({
+      userId: "user3",
+      stockSymbol: "ETH",
+      quantity: 100,
+      price: 5,
+      stockType: "yes"
+    })
+    expect(response.status).toBe(200);
+
+    response = await request(app).post("/order/sell").send({
+      userId: "user3",
+      stockSymbol: "ETH",
+      quantity: 100,
+      price: 6,
+      stockType: "yes"
+    });
+    expect(response.status).toBe(200);
+
+    response = await request(app).post("/order/buy").send({
+      userId: "user1",
+      stockSymbol: "SOL",
+      quantity: 100,
+      price: 8,
+      stockType: "yes"
+    });
+    expect(response.status).toBe(200);
+
+    response = await request(app).get("/balances/inr");
+    expect(response.status).toBe(200);
+    expect(response.body["user2"]).toStrictEqual({
+      balance: 2500,
+      locked: 0
+    })
+
+    response = await request(app).post("/order/buy").send({
+      userId: "user2",
+      stockSymbol: "ETH",
+      quantity: 500,
+      price: 5,
+      stockType: "yes"
+    });
+    expect(response.status).toBe(200);
+
+
+    response = await request(app).post("/order/sell").send({
+      userId: "user4",
+      stockSymbol: "SOL",
+      quantity: 150,
+      price: 7.5,
+      stockType: "yes"
+    });
+    expect(response.status).toBe(200);
+
+    // lets check the result
+
+    response = await request(app).get("/balances/inr");
+    expect(response.status).toBe(200);
+    expect(response.body["user1"]).toStrictEqual({
+      balance: 500,
+      locked: 700
+    });
+
+    response = await request(app).get("/balances/stock");
+    expect(response.status).toBe(200);
+    expect(response.body["user1"]["SOL"]["yes"]).toStrictEqual({
+      quantity: 100,
+      locked: 0,
+    });
+
+
+    response = await request(app).get("/balances/inr");
+    expect(response.status).toBe(200);
+    expect(response.body["user2"]).toStrictEqual({
       balance: 100,
+      locked: 1500
+    })
+    response = await request(app).get("/balances/stock");
+    expect(response.status).toBe(200);
+    expect(response.body["user2"]["ETH"]["yes"]).toStrictEqual({
+      quantity: 200,
+      locked: 0,
+    });
+
+    response = await request(app).get("/balances/inr");
+    expect(response.status).toBe(200);
+    expect(response.body["user3"]).toStrictEqual({
+      balance: 900,
+      locked: 0
+    })
+    response = await request(app).get("/balances/stock");
+    expect(response.status).toBe(200);
+    expect(response.body["user3"]["ETH"]["yes"]).toStrictEqual({
+      quantity: 200,
       locked: 100,
     });
 
-    // response = await request(app).get("/balances/inr");
-    // expect(response.status).toBe(200);
-    // expect(response.body["user3"]).toStrictEqual({
-    //   balance: 600,
-    //   locked: 0
-    // })
-
-    // response = await request(app).get("/balances/stock");
-    // expect(response.status).toBe(200);
-    // expect(response.body["user1"]["ETH_SOL_16_Oct_2024_12_00"]["no"]).toStrictEqual({
-    //   quantity: 100,
-    //   locked: 0
-    // });
-
-    // response = await request(app).get("/balances/stock");
-    // expect(response.status).toBe(200);
-    // expect(response.body["user3"]["ETH_SOL_16_Oct_2024_12_00"]["no"]).toStrictEqual({
-    //   quantity: 200,
-    //   locked: 200,
-    // });
-    // ///////
-
-    // response = await request(app).get("/balances/stock");
-    // expect(response.status).toBe(200);
-    // expect(response.body["user3"]["ETH_SOL_16_Oct_2024_12_00"]["yes"]).toStrictEqual({
-    //   quantity: 0,
-    //   locked: 500,
-    // });
-
-
-
-
-
-
-
-});
-});
+    response = await request(app).get("/balances/inr");
+    expect(response.status).toBe(200);
+    expect(response.body["user4"]).toStrictEqual({
+      balance: 750,
+      locked: 0
+    })
+    response = await request(app).get("/balances/stock");
+    expect(response.status).toBe(200);
+    expect(response.body["user4"]["SOL"]["yes"]).toStrictEqual({
+      quantity: 350,
+      locked: 50,
+    });
+  })
+})
