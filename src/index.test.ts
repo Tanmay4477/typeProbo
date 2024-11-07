@@ -1,4 +1,4 @@
-import { stockSymbol, stockType } from './variables';
+// import { stockSymbol, stockType } from './variables';
 import {app} from "./index";
 import request from "supertest";
 
